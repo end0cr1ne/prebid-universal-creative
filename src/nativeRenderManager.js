@@ -1,8 +1,9 @@
 /*
- * Script to handle firing impression and click trackers from native teamplates
+ * Script to handle firing impression and click trackers from native templates
  */
 import { newNativeAssetManager } from './nativeAssetManager';
 import {prebidMessenger} from './messaging.js';
+import {transformAuctionTargetingData} from './utils.js'
 
 const AD_ANCHOR_CLASS_NAME = 'pb-click';
 const AD_DATA_ADID_ATTRIBUTE = 'pbAdId';
@@ -61,12 +62,17 @@ export function newNativeRenderManager(win) {
         scr.id = 'pb-native-renderer';
         doc.body.appendChild(scr);
       }
-      nativeAssetManager.loadAssets(nativeTag.adId, () => {
+      nativeAssetManager.loadAssets(nativeTag, () => {
         fireNativeImpTracker(nativeTag.adId);
         fireNativeCallback();
       });
     } else {
       console.warn("Prebid Native Tag object was missing 'adId'.");
+      let tNativeTag = transformAuctionTargetingData(nativeTag);
+      nativeAssetManager.loadMobileAssets(tNativeTag, () => {
+        // fireNativeImpTracker(nativeTag.adId);
+        fireNativeCallback();
+      });
     }
   }
 
